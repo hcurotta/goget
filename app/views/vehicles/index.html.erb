@@ -1,0 +1,85 @@
+<script type="text/javascript">
+	var map;
+	var arrMarkers = [];
+	var arrInfoWindows = [];
+	
+	function mapInit(){
+		var centerCoord = new google.maps.LatLng(-33.86,151.20); 
+		var mapOptions = {
+			zoom: 15,
+			center: centerCoord,
+			mapTypeId: google.maps.MapTypeId.ROADMAP
+		};
+		map = new google.maps.Map(document.getElementById("map"), mapOptions);
+		
+		
+		$.getJSON("/vehicles.json", {}, function(data){
+			var LatLngList = new Array;
+			
+      console.log(data)
+
+			$.each(data, function(i, item){
+			
+				LatLngList.push(new google.maps.LatLng(item.latitude, item.longitude));
+				
+				
+				var marker = new google.maps.Marker({
+					position: new google.maps.LatLng(item.latitude, item.longitude),
+					map: map,
+					icon: item.type,
+					title: item.name
+				});
+				
+				prev_infowindow =false
+				arrMarkers[i] = marker;
+				var infowindow = new google.maps.InfoWindow({
+					content: "<h3>"+ item.name +"</h3><img src='https://www.goget.com.au/bookings/vehicles/"+item.goget_id+".jpg' width=200><p>"+ item.pod +"</p>"
+				});
+				arrInfoWindows[i] = infowindow;
+				google.maps.event.addListener(marker, 'click', function() {
+					if( prev_infowindow )
+					    {
+					    prev_infowindow.close();
+					        }
+					infowindow.open(map, marker);
+					prev_infowindow = infowindow;
+			    
+				});
+			});
+			
+			// var bounds = new google.maps.LatLngBounds ();
+			// //  Go through each...
+			// for (var i = 0, LtLgLen = LatLngList.length; i < LtLgLen; i++) {
+			//   //  And increase the bounds to take this point
+			//   bounds.extend (LatLngList[i]);
+			// }
+			// //  Fit these bounds to the map
+			// map.fitBounds (bounds);
+			
+		});
+	}
+	$(function(){
+		// initialize map (create markers, infowindows and list)
+		mapInit();
+		
+		// "live" bind click event
+		$("#markers a").live("click", function(){
+			var i = $(this).attr("rel");
+			map.setZoom(17);
+			var marker = arrMarkers[i].position
+			map.panTo(marker);
+			
+			// this next line closes all open infowindows before opening the selected one
+			for(x=0; x < arrInfoWindows.length; x++){ arrInfoWindows[x].close(); }
+			arrInfoWindows[i].open(map, arrMarkers[i]);
+		});
+	});
+</script>
+<style>
+#map{
+	width: 100%;
+	height:660px; 
+}
+</style>
+
+<div id="map"></div>

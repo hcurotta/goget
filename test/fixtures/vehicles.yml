@@ -1,0 +1,19 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  goget_id: 1
+  name: MyString
+  type: 
+  pod: MyString
+  pod_id: 1
+  latitude: MyString
+  longitude: MyString
+
+two:
+  goget_id: 1
+  name: MyString
+  type: 
+  pod: MyString
+  pod_id: 1
+  latitude: MyString
+  longitude: MyString
