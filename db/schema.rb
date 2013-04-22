@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130421142716) do
+ActiveRecord::Schema.define(:version => 20130422002633) do
 
   create_table "vehicles", :force => true do |t|
     t.integer  "goget_id"
@@ -23,6 +23,7 @@ ActiveRecord::Schema.define(:version => 20130421142716) do
     t.string   "longitude"
     t.datetime "created_at",   :null => false
     t.datetime "updated_at",   :null => false
+    t.boolean  "available"
   end
 
 end

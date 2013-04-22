@@ -10,11 +10,19 @@
 			center: centerCoord,
 			mapTypeId: google.maps.MapTypeId.ROADMAP
 		};
+		
 		map = new google.maps.Map(document.getElementById("map"), mapOptions);
 		
 		
 		$.getJSON("/vehicles.json", {}, function(data){
 			var LatLngList = new Array;
+			
+			var icons = {
+			  van: {
+			    icon: '/assets/van.png',
+			  }
+			};
+			
 			
       console.log(data)
 
@@ -26,8 +34,9 @@
 				var marker = new google.maps.Marker({
 					position: new google.maps.LatLng(item.latitude, item.longitude),
 					map: map,
-					icon: item.type,
-					title: item.name
+					// icon: icons["van"].icon,
+					title: item.name,
+					vehicle_type: item.vehicle_type
 				});
 				
 				prev_infowindow =false
@@ -47,6 +56,7 @@
 				});
 			});
 			
+			
 			// var bounds = new google.maps.LatLngBounds ();
 			// //  Go through each...
 			// for (var i = 0, LtLgLen = LatLngList.length; i < LtLgLen; i++) {
@@ -58,6 +68,8 @@
 			
 		});
 	}
+	
+	
 	$(function(){
 		// initialize map (create markers, infowindows and list)
 		mapInit();
@@ -72,14 +84,88 @@
 			// this next line closes all open infowindows before opening the selected one
 			for(x=0; x < arrInfoWindows.length; x++){ arrInfoWindows[x].close(); }
 			arrInfoWindows[i].open(map, arrMarkers[i]);
-		});
+		});		
 	});
+	
+	function show(vehicle_type) {
+    for (var i=0; i<arrMarkers.length; i++) {
+      if (arrMarkers[i].vehicle_type == vehicle_type) {
+        arrMarkers[i].setVisible(true);
+      }
+    }
+	}
+	
+	function hide(vehicle_type) {
+    for (var i=0; i<arrMarkers.length; i++) {
+      if (arrMarkers[i].vehicle_type == vehicle_type) {
+        arrMarkers[i].setVisible(false);
+      }
+    }
+	}
+	
+	function toggle(vehicle_type) {
+    for (var i=0; i<arrMarkers.length; i++) {
+      if (arrMarkers[i].vehicle_type == vehicle_type) {
+        if (arrMarkers[i].getVisible() == true) {
+					arrMarkers[i].setVisible(false);
+				}else{
+					arrMarkers[i].setVisible(true);
+				}
+      }
+    }
+	}
+	
+	function showOnly(vehicle_type) {
+		for (var i=0; i<arrMarkers.length; i++) {
+	    if (arrMarkers[i].vehicle_type == vehicle_type) {
+	      arrMarkers[i].setVisible(true);
+			}else{
+				arrMarkers[i].setVisible(false);	
+	    }
+	  }
+	}
 </script>
 <style>
-#map{
-	width: 100%;
-	height:660px; 
-}
+	#map{
+		width: 100%;
+		height:100%;
+		position: absolute;
+		left: 0px;
+    top: 0px; 
+	}
+	#over_map { position:absolute;
+  left:100px;
+  top: 30px;
+	background-color: white;
+	padding: 10px;
+  z-index:3;
+	border-radius: 5px;
+	}
+	ul {
+		font-size: 11px;
+		font-family: arial, helvetica;
+		list-style:none;
+		padding: 0;
+	}
+	
+	h3 {
+		font-family: arial, helvetica;
+		padding:0;
+		margin:0;
+	}
 </style>
 
-<div id="map"></div>
+<div id="map">
+  </div>
+
+  <div id="over_map">
+		<h3>Filter Car Type</h3>
+		<ul>
+			<% @vehicles.map {|a| a.vehicle_type}.uniq.each do |type| %>
+				<li><a href="#" onclick="toggle('<%= type %>')"><%= type %></a>
+					- 
+					<a href="#" onclick="showOnly('<%= type %>')">only</a>
+				</li>
+			<% end %>
+			</ul>
+  </div>
