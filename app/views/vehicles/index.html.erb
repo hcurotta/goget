@@ -6,7 +6,7 @@
 	function mapInit(){
 		var centerCoord = new google.maps.LatLng(-33.86,151.20); 
 		var mapOptions = {
-			zoom: 15,
+			zoom: 13,
 			center: centerCoord,
 			mapTypeId: google.maps.MapTypeId.ROADMAP
 		};
@@ -18,8 +18,11 @@
 			var LatLngList = new Array;
 			
 			var icons = {
-			  van: {
-			    icon: '/assets/van.png',
+			  "true": {
+			    icon: 'http://www.goget.com.au/bookings/templates/blue/images/greenman.png'
+			  },
+				"false": {
+			    icon: 'http://www.goget.com.au/bookings/templates/blue/images/redman.png'
 			  }
 			};
 			
@@ -28,13 +31,15 @@
 
 			$.each(data, function(i, item){
 			
+			if (item.available != null) {
 				LatLngList.push(new google.maps.LatLng(item.latitude, item.longitude));
 				
+				console.log(item.available)
 				
 				var marker = new google.maps.Marker({
 					position: new google.maps.LatLng(item.latitude, item.longitude),
 					map: map,
-					// icon: icons["van"].icon,
+					icon: icons[item.available.toString()].icon,
 					title: item.name,
 					vehicle_type: item.vehicle_type
 				});
@@ -42,7 +47,7 @@
 				prev_infowindow =false
 				arrMarkers[i] = marker;
 				var infowindow = new google.maps.InfoWindow({
-					content: "<h3>"+ item.name +"</h3><img src='https://www.goget.com.au/bookings/vehicles/"+item.goget_id+".jpg' width=200><p>"+ item.pod +"</p>"
+					content: "<h3>"+ item.name +"</h3><img src='https://www.goget.com.au/bookings/vehicles/"+item.goget_id+".jpg' width=200><p>"+ item.pod +"</p><p>available: " + item.available
 				});
 				arrInfoWindows[i] = infowindow;
 				google.maps.event.addListener(marker, 'click', function() {
@@ -54,6 +59,7 @@
 					prev_infowindow = infowindow;
 			    
 				});
+			}
 			});
 			
 			
@@ -124,6 +130,17 @@
 	    }
 	  }
 	}
+	
+	// function toggleAvailable() {
+	// 	for (var i=0; i<arrMarkers.length; i++) {
+	//     if (arrMarkers[i].available == true) {
+	//       arrMarkers[i].setVisible(true);
+	// 		}else{
+	// 			arrMarkers[i].setVisible(false);	
+	//     }
+	//   }
+	// }
+	
 </script>
 <style>
 	#map{
@@ -162,10 +179,10 @@
 		<h3>Filter Car Type</h3>
 		<ul>
 			<% @vehicles.map {|a| a.vehicle_type}.uniq.each do |type| %>
-				<li><a href="#" onclick="toggle('<%= type %>')"><%= type %></a>
-					- 
-					<a href="#" onclick="showOnly('<%= type %>')">only</a>
-				</li>
+					<li><a href="#" onclick="toggle('<%= type %>')"><%= type %></a>
+						- 
+						<a href="#" onclick="showOnly('<%= type %>')" class='label'>only</a>
+					</li>
 			<% end %>
 			</ul>
   </div>
