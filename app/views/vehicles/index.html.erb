@@ -49,7 +49,7 @@
 				}
 				
 				var infowindow = new google.maps.InfoWindow({
-					content: "<h3>"+ item.name +"</h3><img src='https://www.goget.com.au/bookings/vehicles/"+item.goget_id+".jpg' width=200><p>"+ item.pod +"</p></br><p>Currently " + availableString
+					content: "<h3>"+ item.name +"</h3><img src='https://www.goget.com.au/bookings/vehicles/"+item.goget_id+".jpg' width=200><p>"+ item.pod +"</p></br><p>Currently " + availableString +"</p>" + "<p><a href='http://www.goget.com.au/bookings/edit_entry.php?room="+item.goget_id+"'>Book</a>"
 				});
 				arrInfoWindows[i] = infowindow;
 				google.maps.event.addListener(marker, 'click', function() {
