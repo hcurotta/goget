@@ -41,6 +41,22 @@ body {
 	  top: 20px;	
 	  z-index:5;
 	}
+
+	#credits {
+	  position:absolute;
+	  right:20px;
+	  bottom: 25px;	
+	  z-index:5;
+	padding: 3px 10px;
+	  font-size: 14px;
+	  background: black;
+	  color: white;
+	  opacity: 0.7;
+	}
+	
+	#credits a {
+	  color: white;	
+	}
 	
 	ul {
 		font-size: 13px;

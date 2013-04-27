@@ -6,7 +6,7 @@
 	function mapInit(){
 		var centerCoord = new google.maps.LatLng(-33.86,151.20); 
 		var mapOptions = {
-			zoom: 13,
+			zoom: 14,
 			center: centerCoord,
 			mapTypeId: google.maps.MapTypeId.ROADMAP
 		};
@@ -19,10 +19,10 @@
 			
 			var icons = {
 			  "true": {
-			    icon: 'http://www.goget.com.au/bookings/templates/blue/images/greenman.png'
+			    icon: 'assets/available-wheel.png'
 			  },
 				"false": {
-			    icon: 'http://www.goget.com.au/bookings/templates/blue/images/redman.png'
+			    icon: 'assets/booked-wheel.png'
 			  }
 			};
 			
@@ -143,6 +143,10 @@
 	<div id="title">
 		<!-- <%= image_tag "logo-white.png", width: 200 %> -->
 		<h1>A better way to find a GoGet</h1>
+	</div>
+	
+	<div id="credits">
+		<p>Created by <%= link_to "@HiHarryHere", "http://www.twitter.com/hiharryhere" %></p>
 	</div>
 
   <div id="over_map">
