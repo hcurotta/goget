@@ -1,6 +1,9 @@
 Goget::Application.routes.draw do
   resources :vehicles
-
+  
+  root :to => "vehicles#index"
+  
+  get '/update_availability' => "vehicles#update_availability"
 
   # The priority is based upon order of creation:
   # first created -> highest priority.

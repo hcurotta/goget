@@ -26,16 +26,11 @@
 			  }
 			};
 			
-			
-      console.log(data)
-
 			$.each(data, function(i, item){
 			
 			if (item.available != null) {
 				LatLngList.push(new google.maps.LatLng(item.latitude, item.longitude));
-				
-				console.log(item.available)
-				
+					
 				var marker = new google.maps.Marker({
 					position: new google.maps.LatLng(item.latitude, item.longitude),
 					map: map,
@@ -46,8 +41,15 @@
 				
 				prev_infowindow =false
 				arrMarkers[i] = marker;
+				
+				if (item.available == true) {
+				 var availableString = "available"	
+				} else {
+					var availableString = "unavailable"
+				}
+				
 				var infowindow = new google.maps.InfoWindow({
-					content: "<h3>"+ item.name +"</h3><img src='https://www.goget.com.au/bookings/vehicles/"+item.goget_id+".jpg' width=200><p>"+ item.pod +"</p><p>available: " + item.available
+					content: "<h3>"+ item.name +"</h3><img src='https://www.goget.com.au/bookings/vehicles/"+item.goget_id+".jpg' width=200><p>"+ item.pod +"</p></br><p>Currently " + availableString
 				});
 				arrInfoWindows[i] = infowindow;
 				google.maps.event.addListener(marker, 'click', function() {
@@ -62,23 +64,18 @@
 			}
 			});
 			
-			
-			// var bounds = new google.maps.LatLngBounds ();
-			// //  Go through each...
-			// for (var i = 0, LtLgLen = LatLngList.length; i < LtLgLen; i++) {
-			//   //  And increase the bounds to take this point
-			//   bounds.extend (LatLngList[i]);
-			// }
-			// //  Fit these bounds to the map
-			// map.fitBounds (bounds);
-			
 		});
 	}
 	
 	
-	$(function(){
+	$(document).ready(function(){
 		// initialize map (create markers, infowindows and list)
 		mapInit();
+		
+		$("#show_all").bind("click", showAll);
+		$("#hide_all").bind("click", hideAll);
+		$(".filter").bind("click", toggle);
+		
 		
 		// "live" bind click event
 		$("#markers a").live("click", function(){
@@ -91,31 +88,35 @@
 			for(x=0; x < arrInfoWindows.length; x++){ arrInfoWindows[x].close(); }
 			arrInfoWindows[i].open(map, arrMarkers[i]);
 		});		
+		
+
+		
 	});
 	
-	function show(vehicle_type) {
+	function showAll() {
     for (var i=0; i<arrMarkers.length; i++) {
-      if (arrMarkers[i].vehicle_type == vehicle_type) {
         arrMarkers[i].setVisible(true);
-      }
     }
+		$(".filters li").addClass("active");
 	}
 	
-	function hide(vehicle_type) {
+	function hideAll() {
     for (var i=0; i<arrMarkers.length; i++) {
-      if (arrMarkers[i].vehicle_type == vehicle_type) {
         arrMarkers[i].setVisible(false);
-      }
     }
+		$(".filters li").removeClass("active");
 	}
 	
 	function toggle(vehicle_type) {
+		
     for (var i=0; i<arrMarkers.length; i++) {
-      if (arrMarkers[i].vehicle_type == vehicle_type) {
+      if (arrMarkers[i].vehicle_type == this.innerHTML) {
         if (arrMarkers[i].getVisible() == true) {
 					arrMarkers[i].setVisible(false);
+					$(this).removeClass('active')
 				}else{
 					arrMarkers[i].setVisible(true);
+					$(this).addClass('active')
 				}
       }
     }
@@ -131,58 +132,25 @@
 	  }
 	}
 	
-	// function toggleAvailable() {
-	// 	for (var i=0; i<arrMarkers.length; i++) {
-	//     if (arrMarkers[i].available == true) {
-	//       arrMarkers[i].setVisible(true);
-	// 		}else{
-	// 			arrMarkers[i].setVisible(false);	
-	//     }
-	//   }
-	// }
-	
 </script>
 <style>
-	#map{
-		width: 100%;
-		height:100%;
-		position: absolute;
-		left: 0px;
-    top: 0px; 
-	}
-	#over_map { position:absolute;
-  left:100px;
-  top: 30px;
-	background-color: white;
-	padding: 10px;
-  z-index:3;
-	border-radius: 5px;
-	}
-	ul {
-		font-size: 11px;
-		font-family: arial, helvetica;
-		list-style:none;
-		padding: 0;
-	}
-	
-	h3 {
-		font-family: arial, helvetica;
-		padding:0;
-		margin:0;
-	}
+
 </style>
 
 <div id="map">
   </div>
 
+	<div id="title">
+		<!-- <%= image_tag "logo-white.png", width: 200 %> -->
+		<h1>A better way to find a GoGet</h1>
+	</div>
+
   <div id="over_map">
-		<h3>Filter Car Type</h3>
-		<ul>
+		<h3 class='lead'>Car Type</h3>
+		<span class="pill" id="show_all">show all</span> <span class="pill" id="hide_all">hide all</span>
+		<ul class='filters'>
 			<% @vehicles.map {|a| a.vehicle_type}.uniq.each do |type| %>
-					<li><a href="#" onclick="toggle('<%= type %>')"><%= type %></a>
-						- 
-						<a href="#" onclick="showOnly('<%= type %>')" class='label'>only</a>
-					</li>
+					<li class='filter active'><%= type %></li>
 			<% end %>
 			</ul>
   </div>
