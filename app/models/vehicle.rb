@@ -32,6 +32,7 @@ class Vehicle < ActiveRecord::Base
   			location = {}
   		end
   	end
+  	puts "All Locations Updated"
   	return locations
   end
   
