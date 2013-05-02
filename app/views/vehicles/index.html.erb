@@ -2,16 +2,22 @@
 	var map;
 	var arrMarkers = [];
 	var arrInfoWindows = [];
+	var gm = google.maps;
+	
 	
 	function mapInit(){
-		var centerCoord = new google.maps.LatLng(-33.86,151.20); 
+		var centerCoord = new gm.LatLng(-33.86,151.20); 
 		var mapOptions = {
 			zoom: 14,
 			center: centerCoord,
-			mapTypeId: google.maps.MapTypeId.ROADMAP
+			mapTypeId: gm.MapTypeId.ROADMAP
 		};
 		
-		map = new google.maps.Map(document.getElementById("map"), mapOptions);
+		var map = new gm.Map(document.getElementById("map"), mapOptions);
+		var oms = new OverlappingMarkerSpiderfier(map, {nearbyDistance: 1});
+		var infowindow = new gm.InfoWindow();
+		
+		
 		
 		
 		$.getJSON("/vehicles.json", {}, function(data){
@@ -28,41 +34,90 @@
 			
 			$.each(data, function(i, item){
 			
-			if (item.available != null) {
-				LatLngList.push(new google.maps.LatLng(item.latitude, item.longitude));
+				if (item.available != null) {
+					LatLngList.push(new gm.LatLng(item.latitude, item.longitude));
 					
-				var marker = new google.maps.Marker({
-					position: new google.maps.LatLng(item.latitude, item.longitude),
-					map: map,
-					icon: icons[item.available.toString()].icon,
-					title: item.name,
-					vehicle_type: item.vehicle_type
-				});
+					if (item.available == true) {
+					 var availableString = "available"	
+					} else {
+						var availableString = "booked"
+					}
+					
+					var marker = new gm.Marker({
+						position: new gm.LatLng(item.latitude, item.longitude),
+						map: map,
+						icon: icons[item.available.toString()].icon,
+						title: item.name,
+						vehicle_type: item.vehicle_type,
+						desc: "<img src='http://google-maps-utility-library-v3.googlecode.com/svn/trunk/infobox/examples/tipbox.gif'"+
+						"style='margin-left: -40px';>"+
+						"<div class='info' "+
+						"style='background-color: black; margin-top: -4px; padding: 10px; color: white;'>"+
+						"<h3>"+ item.name +
+						"</h3><img src='https://www.goget.com.au/bookings/vehicles/"+item.goget_id+".jpg' width=200><p>"+ item.pod +"</p></br><p>Currently " + availableString +"</p>" + 
+						"<p style='margin: 20px 0px 10px 0px;'><a href='http://www.goget.com.au/bookings/edit_entry.php?room="+item.goget_id+
+						"' style='padding: 5px 10px; border: solid 2px white; text-decoration: none; color: white' target='_blank'>Book this car</a></div>"
+					});
 				
-				prev_infowindow =false
-				arrMarkers[i] = marker;
+					prev_infowindow = false;
+					arrMarkers[i] = marker;
+					oms.addMarker(marker);
 				
-				if (item.available == true) {
-				 var availableString = "available"	
-				} else {
-					var availableString = "unavailable"
-				}
+
 				
-				var infowindow = new google.maps.InfoWindow({
-					content: "<h3>"+ item.name +"</h3><img src='https://www.goget.com.au/bookings/vehicles/"+item.goget_id+".jpg' width=200><p>"+ item.pod +"</p></br><p>Currently " + availableString +"</p>" + "<p><a href='http://www.goget.com.au/bookings/edit_entry.php?room="+item.goget_id+"'>Book</a>"
-				});
-				arrInfoWindows[i] = infowindow;
-				google.maps.event.addListener(marker, 'click', function() {
-					if( prev_infowindow )
-					    {
-					    prev_infowindow.close();
-					        }
-					infowindow.open(map, marker);
-					prev_infowindow = infowindow;
-			    
-				});
+					// var infowindow = new gm.InfoWindow({
+					// 	content: 
+					// });
+					
+					arrInfoWindows[i] = infowindow;
+					// google.maps.event.addListener(marker, 'click', function() {
+					// 				if( prev_infowindow )
+					// 				    {
+					// 				    prev_infowindow.close();
+					// 				        }
+					// 				infowindow.open(map, marker);
+					// 				prev_infowindow = infowindow;
+					// 		    
+					// 			});
+					
 			}
 			});
+			
+			oms.addListener('click', function(marker) {
+				console.log("clicked");
+				
+				var boxText = document.createElement("div");
+        boxText.innerHTML = marker.desc;
+				
+				infobox = new InfoBox({
+				    content: boxText,
+				    disableAutoPan: false,
+				    maxWidth: 100,
+				    pixelOffset: new google.maps.Size(-100, 0),
+				    zIndex: null,
+				    boxStyle: {
+				                opacity: 1
+					        		},
+				    closeBoxMargin: "20px 10px 2px 2px",
+				    closeBoxURL: "http://www.google.com/intl/en_us/mapfiles/close.gif",
+				    infoBoxClearance: new google.maps.Size(1, 1)
+				});
+				
+				infobox.open(map, marker);
+				
+			 if( prev_infowindow ){prev_infowindow.close();}
+			 				infobox.setContent(marker.desc);
+			 				infobox.open(map, marker);
+			 				prev_infowindow = infobox;
+			  infobox.open(map, marker);
+				map.panTo(marker.getPosition());
+			});
+
+			oms.addListener('spiderfy', function(markers) {
+				console.log("spiderfy");
+			  infobox.close();
+			});
+			
 			
 		});
 	}
@@ -71,7 +126,7 @@
 	$(document).ready(function(){
 		// initialize map (create markers, infowindows and list)
 		mapInit();
-		
+				
 		$("#show_all").bind("click", showAll);
 		$("#hide_all").bind("click", hideAll);
 		$(".filter").bind("click", toggle);
@@ -81,11 +136,12 @@
 		$("#markers a").live("click", function(){
 			var i = $(this).attr("rel");
 			map.setZoom(17);
-			var marker = arrMarkers[i].position
+			// var marker = arrMarkers[i].position
 			map.panTo(marker);
 			
 			// this next line closes all open infowindows before opening the selected one
 			for(x=0; x < arrInfoWindows.length; x++){ arrInfoWindows[x].close(); }
+			
 			arrInfoWindows[i].open(map, arrMarkers[i]);
 		});		
 		
@@ -146,7 +202,7 @@
 	</div>
 	
 	<div id="credits">
-		<p>Created by <%= link_to "@HiHarryHere", "http://www.twitter.com/hiharryhere" %></p>
+		<p>Created by <%= link_to "Harry Curotta", "http://www.twitter.com/hiharryhere" %></p>
 	</div>
 
   <div id="over_map">
